@@ -1,0 +1,86 @@
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: docsafe_review_db
+    environment:
+      POSTGRES_DB: docsafe_review
+      POSTGRES_USER: docsafe_user
+      POSTGRES_PASSWORD: ReviewPass123!
+    volumes:
+      - docsafe_review_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - docsafe_review_network
+    restart: unless-stopped
+
+  # Redis for Session Management
+  redis:
+    image: redis:7-alpine
+    container_name: docsafe_review_redis
+    command: redis-server --appendonly yes --requirepass ReviewRedis123!
+    volumes:
+      - docsafe_review_redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - docsafe_review_network
+    restart: unless-stopped
+
+  # Backend API (FastAPI)
+  backend:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+    container_name: docsafe_review_backend
+    environment:
+      - DATABASE_URL=postgresql://docsafe_user:ReviewPass123!@db:5432/docsafe_review
+      - REDIS_URL=redis://:ReviewRedis123!@redis:6379/0
+      - SECRET_KEY=ReviewSecretKey123456789CustomerDemo
+      - ENVIRONMENT=production
+      - CORS_ORIGINS=["http://localhost:3000", "http://your-ec2-ip:3000"]
+      - DEBUG=false
+      - LOG_LEVEL=INFO
+    volumes:
+      - docsafe_review_files:/app/encrypted-files
+      - docsafe_review_backups:/app/backups
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    networks:
+      - docsafe_review_network
+    restart: unless-stopped
+
+  # Frontend (React + Vite)
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+    container_name: docsafe_review_frontend
+    environment:
+      - VITE_API_URL=http://your-ec2-ip:8000
+      - VITE_APP_TITLE=DocSafe Review
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - docsafe_review_network
+    restart: unless-stopped
+
+volumes:
+  docsafe_review_data:
+    driver: local
+  docsafe_review_redis_data:
+    driver: local
+  docsafe_review_files:
+    driver: local
+  docsafe_review_backups:
+    driver: local
+
+networks:
+  docsafe_review_network:
+    driver: bridge
