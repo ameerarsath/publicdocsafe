@@ -18,7 +18,7 @@ if ! docker ps | grep -q docsafe_review_db; then
 fi
 
 # Copy SQL script to container
-docker cp create-review-admin.sql docsafe_review_db:/tmp/create-review-admin.sql
+docker cp scripts/create-review-admin.sql docsafe_review_db:/tmp/create-review-admin.sql
 
 # Execute the SQL script
 echo "🔐 Creating admin user..."

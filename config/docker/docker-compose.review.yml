@@ -39,7 +39,7 @@ services:
       - REDIS_URL=redis://:ReviewRedis123!@redis:6379/0
       - SECRET_KEY=ReviewSecretKey123456789CustomerDemo
       - ENVIRONMENT=production
-      - CORS_ORIGINS=["http://localhost:3000", "http://your-ec2-ip:3000"]
+      - CORS_ORIGINS=["http://localhost:3005", "http://your-ec2-ip:3005"]
       - DEBUG=false
       - LOG_LEVEL=INFO
     volumes:
@@ -64,7 +64,7 @@ services:
       - VITE_API_URL=http://your-ec2-ip:8000
       - VITE_APP_TITLE=DocSafe Review
     ports:
-      - "3000:3000"
+      - "3005:3005"
     depends_on:
       - backend
     networks:
