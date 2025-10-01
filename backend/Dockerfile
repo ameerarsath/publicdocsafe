@@ -18,7 +18,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-COPY requirements.txt .
+COPY requirements/base.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Create directories for data
